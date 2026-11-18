@@ -21,3 +21,4 @@ pytest
 httpx
 
 psycopg[binary]
+pwdlib[argon2]
