@@ -1,0 +1,25 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: brandsentinel_db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: brandsentinel
+      POSTGRES_USER: brandsentinel_user
+      POSTGRES_PASSWORD: brandsentinel_password
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - brandsentinel_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U brandsentinel_user -d brandsentinel"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  brandsentinel_data:

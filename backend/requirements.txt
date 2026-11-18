@@ -1,0 +1,21 @@
+# Backend framework
+fastapi[standard]
+
+# Database and configuration
+sqlalchemy
+pydantic-settings
+python-dotenv
+
+# File uploads and processing
+python-multipart
+pillow
+pymupdf
+python-docx
+
+# Retrieval and text analysis
+scikit-learn
+numpy
+
+# Testing
+pytest
+httpx

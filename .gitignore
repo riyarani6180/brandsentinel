@@ -1,0 +1,54 @@
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Uploaded documents and user files
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Database files
+*.sqlite3
+*.db
+
+# Logs
+*.log
+logs/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Python packaging
+build/
+dist/
+*.egg-info/
+
+# Node modules
+node_modules/
+frontend/node_modules/
+
+# Frontend build output
+frontend/dist/
+frontend/build/
+
+# IDE settings
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini

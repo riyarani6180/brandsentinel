@@ -1,0 +1,202 @@
+
+.submission-page {
+  max-width: 1050px;
+  margin: 0 auto;
+  padding: 35px;
+}
+
+.submission-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.submission-eyebrow {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.submission-heading h1 {
+  font-size: 30px;
+  color: #172033;
+  margin: 10px 0;
+}
+
+.submission-heading p {
+  color: #64748b;
+}
+
+.submission-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 15px;
+  background: #e9efff;
+  color: #405bd8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submission-card {
+  background: white;
+  border: 1px solid #e5eaf1;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 5px 20px rgba(20, 35, 60, 0.04);
+}
+
+.submission-card-heading {
+  margin-bottom: 25px;
+}
+
+.submission-card-heading h2 {
+  color: #172033;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.submission-card-heading p {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.submission-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 22px;
+}
+
+.submission-field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #253047;
+}
+
+.submission-field input,
+.submission-field textarea,
+.submission-field select {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid #dce2eb;
+  border-radius: 9px;
+  background: #fff;
+  color: #172033;
+  font: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.submission-field input:focus,
+.submission-field textarea:focus,
+.submission-field select:focus {
+  border-color: #536de5;
+  box-shadow: 0 0 0 3px rgba(83, 109, 229, 0.1);
+}
+
+.submission-field textarea {
+  resize: vertical;
+  min-height: 150px;
+}
+
+.submission-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #405bd8;
+  color: white;
+  border: none;
+  border-radius: 9px;
+  padding: 14px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submission-submit:hover {
+  background: #3049bd;
+}
+
+.submission-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submission-success,
+.submission-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+  border-radius: 9px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.submission-success {
+  background: #ecfdf3;
+  color: #167344;
+}
+
+.submission-error {
+  background: #fff0f0;
+  color: #b42318;
+}
+
+@media (max-width: 650px) {
+  .submission-page {
+    padding: 20px;
+  }
+
+  .submission-card {
+    padding: 20px;
+  }
+}
+
+.submission-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.analyze-submission-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 11px;
+  border: 1px solid #d8ccff;
+  border-radius: 8px;
+  background: #f4f0ff;
+  color: #6841c6;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.analyze-submission-button:hover {
+  background: #e9e0ff;
+}
+
+.analyze-submission-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submission-action-success {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 15px 20px;
+  padding: 12px 15px;
+  border: 1px solid #b7ebc6;
+  border-radius: 8px;
+  background: #edfff2;
+  color: #18743a;
+  font-size: 14px;
+}
