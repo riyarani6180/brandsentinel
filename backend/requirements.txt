@@ -19,6 +19,6 @@ numpy
 # Testing
 pytest
 httpx
-
 psycopg[binary]
 pwdlib[argon2]
+PyJWT
