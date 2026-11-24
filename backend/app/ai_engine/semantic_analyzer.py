@@ -1,30 +1,33 @@
+
+import os
+import re
 from functools import lru_cache
 from typing import Any
 
 import numpy as np
-from sentence_transformers import SentenceTransformer
 
 
 DEFAULT_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+
+LIGHTWEIGHT_MODE = (
+    os.getenv("LIGHTWEIGHT_SEMANTIC_MODE", "false").lower()
+    == "true"
+)
 
 
 @lru_cache(maxsize=1)
 def get_semantic_model():
     """
-    Load the semantic model once and reuse it.
-    The model is downloaded on first use.
+    Load the Sentence Transformer only when needed.
     """
+    from sentence_transformers import SentenceTransformer
+
     return SentenceTransformer(DEFAULT_MODEL)
 
 
 def extract_sentences(text: str) -> list[str]:
-    """
-    Split submitted content into individual sentences.
-    """
     if not text or not text.strip():
         return []
-
-    import re
 
     sentences = re.split(r"(?<=[.!?])\s+", text.strip())
 
@@ -35,22 +38,25 @@ def extract_sentences(text: str) -> list[str]:
     ]
 
 
+def calculate_keyword_similarity(text1: str, text2: str) -> float:
+    """
+    Lightweight token-overlap similarity.
+    Does not load PyTorch or a machine-learning model.
+    """
+    words1 = set(re.findall(r"\b\w+\b", text1.lower()))
+    words2 = set(re.findall(r"\b\w+\b", text2.lower()))
+
+    if not words1 or not words2:
+        return 0.0
+
+    return len(words1 & words2) / len(words1 | words2)
+
+
 def compare_claims_with_approved_facts(
     claims: list[str],
     approved_facts: list[dict[str, Any]],
     top_k: int = 3
 ) -> list[dict[str, Any]]:
-    """
-    Find the most semantically relevant approved facts
-    for every submitted claim.
-
-    Expected approved fact format:
-
-    {
-        "fact_content": "Product contains 2% salicylic acid",
-        "source_reference": "Official product specification"
-    }
-    """
 
     if not claims or not approved_facts:
         return []
@@ -79,9 +85,41 @@ def compare_claims_with_approved_facts(
         for fact in valid_facts
     ]
 
+    results = []
+
+    if LIGHTWEIGHT_MODE:
+        # Memory-friendly matching for Render Free.
+        for claim in clean_claims:
+            matches = []
+
+            for index, fact_text in enumerate(fact_texts):
+                similarity = calculate_keyword_similarity(
+                    claim, fact_text
+                )
+
+                matches.append({
+                    "fact_content": fact_text,
+                    "source_reference": valid_facts[index].get(
+                        "source_reference"
+                    ),
+                    "similarity": round(similarity, 4)
+                })
+
+            matches.sort(
+                key=lambda item: item["similarity"],
+                reverse=True
+            )
+
+            results.append({
+                "claim": claim,
+                "matched_facts": matches[:max(1, top_k)]
+            })
+
+        return results
+
+    # Full semantic model for local development.
     model = get_semantic_model()
 
-    # Convert claims and approved facts into embeddings.
     claim_embeddings = model.encode(
         clean_claims,
         convert_to_numpy=True,
@@ -94,36 +132,26 @@ def compare_claims_with_approved_facts(
         normalize_embeddings=True
     )
 
-    # Cosine similarity between normalized embeddings.
     similarity_matrix = np.matmul(
         claim_embeddings,
         fact_embeddings.T
     )
 
-    results = []
-
     for claim_index, claim in enumerate(clean_claims):
-
         similarities = similarity_matrix[claim_index]
-
         ranked_indices = np.argsort(similarities)[::-1]
 
         matches = []
 
         for fact_index in ranked_indices[:max(1, top_k)]:
-
             similarity = float(similarities[fact_index])
-
             fact = valid_facts[int(fact_index)]
 
             matches.append({
                 "fact_content": fact_texts[int(fact_index)],
-                "source_reference": fact.get(
-                    "source_reference"
-                ),
+                "source_reference": fact.get("source_reference"),
                 "similarity": round(
-                    max(0.0, min(1.0, similarity)),
-                    4
+                    max(0.0, min(1.0, similarity)), 4
                 )
             })
 
@@ -140,12 +168,6 @@ def analyze_submission_semantics(
     approved_facts: list[dict[str, Any]],
     top_k: int = 3
 ) -> list[dict[str, Any]]:
-    """
-    Main entry point for semantic analysis.
-
-    Extracts sentences and compares them with
-    approved brand facts.
-    """
 
     claims = extract_sentences(submission_text)
 
