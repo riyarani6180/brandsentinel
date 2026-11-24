@@ -36,12 +36,13 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
+allow_origins=[
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://brandsentinel-teal.vercel.app",
     "https://brandsentinel-fgqfolntl-riyarani6180.vercel.app",
     "https://brandsentinel-c34akzov0-riyarani6180.vercel.app",
+    "https://brandsentinel-xu17-4xu0s4pmg-riyarani6180.vercel.app",
 ],
 
     allow_credentials=True,
