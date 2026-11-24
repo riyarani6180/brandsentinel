@@ -52,3 +52,15 @@ frontend/build/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+
+# Temporary local test scripts
+backend/test_creative_review_api.py
+backend/test_review_api.py
+
+# Local backup files
+backend/app/services/review_service_backup.py
+
+backend/test_logo_verification.py
+
+backend/test_compliance_api.py

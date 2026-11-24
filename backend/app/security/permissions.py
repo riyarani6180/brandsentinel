@@ -43,8 +43,12 @@ ROLE_PERMISSIONS = {
 
 
 def check_permission(role: str, permission: str) -> bool:
-    permissions = ROLE_PERMISSIONS.get(role, [])
-    return permission in permissions
+    normalized_role = str(role).strip().upper()
+    normalized_permission = str(permission).strip().upper()
+
+    permissions = ROLE_PERMISSIONS.get(normalized_role, [])
+
+    return normalized_permission in permissions
 
 
 def require_permission(role: str, permission: str):

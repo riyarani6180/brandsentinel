@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {
   ShieldCheck,
   LayoutDashboard,
+  Activity,
   FileText,
   BookOpen,
   BadgeCheck,
@@ -32,6 +33,7 @@ import AuditLogs from "./pages/AuditLogs";
 import Guidelines from "./pages/Guidelines";
 import ApprovedFacts from "./pages/ApprovedFacts";
 import BrandAssets from "./pages/BrandAssets";
+import Analytics from "./pages/Analytics";
 
 import api from "./services/api";
 import "./App.css";
@@ -40,6 +42,7 @@ const navigation = [
   { name: "Dashboard", icon: LayoutDashboard },
   { name: "Submissions", icon: FileText },
   { name: "Review Findings", icon: AlertTriangle },
+  { name: "Analytics", icon: Activity },
   { name: "Guidelines", icon: BookOpen },
   { name: "Approved Facts", icon: BadgeCheck },
   { name: "Brand Assets", icon: Image },
@@ -81,8 +84,21 @@ function App() {
   }
 
   const userName = currentUser.full_name || "Workspace User";
-  const userRole = currentUser.role || "User";
+
+  const userRole = String(currentUser.role || "User")
+    .trim()
+    .toUpperCase();
+
   const canCreate = userRole === "CREATOR";
+  const isAdmin = userRole === "BRAND_ADMIN";
+
+  // Admin sees every navigation option.
+  // Creators do not see Analytics or Audit Logs.
+  const visibleNavigation = isAdmin
+    ? navigation
+    : navigation.filter(
+        ({ name }) => !["Analytics", "Audit Logs"].includes(name)
+      );
 
   const logout = () => {
     localStorage.removeItem("brandsentinel_token");
@@ -130,7 +146,14 @@ function App() {
     return <Login />;
   }
 
+  // Protect Admin-only pages from non-admin navigation.
   const selectPage = (page) => {
+    if (!isAdmin && ["Analytics", "Audit Logs"].includes(page)) {
+      setActivePage("Dashboard");
+      setSidebarOpen(false);
+      return;
+    }
+
     setActivePage(page);
     setSidebarOpen(false);
   };
@@ -188,7 +211,7 @@ function App() {
         <div className="workspace-label">WORKSPACE</div>
 
         <nav className="navigation">
-          {navigation.map(({ name, icon: Icon }) => (
+          {visibleNavigation.map(({ name, icon: Icon }) => (
             <button
               key={name}
               className={`nav-item ${
@@ -507,12 +530,14 @@ function App() {
                   onClick={() => selectPage("Brand Assets")}
                 />
 
-                <QuickLink
-                  icon={ClipboardList}
-                  title="Audit history"
-                  description="Track important actions"
-                  onClick={() => selectPage("Audit Logs")}
-                />
+                {isAdmin && (
+                  <QuickLink
+                    icon={ClipboardList}
+                    title="Audit history"
+                    description="Track important actions"
+                    onClick={() => selectPage("Audit Logs")}
+                  />
+                )}
               </div>
             </section>
 
@@ -536,8 +561,18 @@ function App() {
           />
         ) : activePage === "Review Findings" ? (
           <ReviewFindings />
+        ) : activePage === "Analytics" ? (
+          isAdmin ? (
+            <Analytics />
+          ) : (
+            <AccessDenied />
+          )
         ) : activePage === "Audit Logs" ? (
-          <AuditLogs />
+          isAdmin ? (
+            <AuditLogs />
+          ) : (
+            <AccessDenied />
+          )
         ) : activePage === "Guidelines" ? (
           <Guidelines />
         ) : activePage === "Approved Facts" ? (
@@ -582,6 +617,17 @@ function App() {
           </div>
         )}
       </main>
+    </div>
+  );
+}
+
+function AccessDenied() {
+  return (
+    <div className="page-content">
+      <div className="dashboard-error">
+        You do not have permission to access this page.
+        Please log in with an Admin account.
+      </div>
     </div>
   );
 }

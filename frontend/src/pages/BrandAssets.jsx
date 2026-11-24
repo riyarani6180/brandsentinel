@@ -79,7 +79,10 @@ function BrandAssets() {
     currentUser = {};
   }
 
-  const canManage = currentUser.role === "BRAND_ADMIN";
+  // Normalize the role before checking Admin permissions.
+  const canManage =
+    String(currentUser.role || "").trim().toUpperCase() ===
+    "BRAND_ADMIN";
 
   const fetchAssets = async () => {
     setLoading(true);
@@ -117,7 +120,10 @@ function BrandAssets() {
 
             return [asset.id, url];
           } catch (err) {
-            console.error(`Image loading failed for asset ${asset.id}`, err);
+            console.error(
+              `Image loading failed for asset ${asset.id}`,
+              err
+            );
             return [asset.id, null];
           }
         })
@@ -165,8 +171,13 @@ function BrandAssets() {
     return matchesSearch && matchesFilter;
   });
 
-  const approvedCount = assets.filter((asset) => asset.is_approved).length;
-  const pendingCount = assets.filter((asset) => !asset.is_approved).length;
+  const approvedCount = assets.filter(
+    (asset) => asset.is_approved
+  ).length;
+
+  const pendingCount = assets.filter(
+    (asset) => !asset.is_approved
+  ).length;
 
   const openUpload = () => {
     setForm(initialForm);
@@ -214,7 +225,9 @@ function BrandAssets() {
     ];
 
     if (!allowedTypes.includes(file.type)) {
-      setError("Please select a PNG, JPG, JPEG or WEBP image.");
+      setError(
+        "Please select a PNG, JPG, JPEG or WEBP image."
+      );
       event.target.value = "";
       return;
     }
@@ -255,11 +268,14 @@ function BrandAssets() {
 
     try {
       if (editingAsset) {
-        await api.patch(`/brand-assets/${editingAsset.id}`, {
-          name: form.name.trim(),
-          asset_type: form.asset_type.trim(),
-          description: form.description.trim() || null,
-        });
+        await api.patch(
+          `/brand-assets/${editingAsset.id}`,
+          {
+            name: form.name.trim(),
+            asset_type: form.asset_type.trim(),
+            description: form.description.trim() || null,
+          }
+        );
 
         setSuccess("Brand asset updated successfully.");
       } else {
@@ -287,9 +303,15 @@ function BrandAssets() {
   };
 
   const toggleApproval = async (asset) => {
-    const action = asset.is_approved ? "remove approval from" : "approve";
+    const action = asset.is_approved
+      ? "remove approval from"
+      : "approve";
 
-    if (!window.confirm(`Are you sure you want to ${action} this asset?`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to ${action} this asset?`
+      )
+    ) {
       return;
     }
 
@@ -370,8 +392,10 @@ function BrandAssets() {
         {
           approved_colors: colors,
           alt_text: analysisForm.alt_text || null,
-          foreground_color: analysisForm.foreground_color || null,
-          background_color: analysisForm.background_color || null,
+          foreground_color:
+            analysisForm.foreground_color || null,
+          background_color:
+            analysisForm.background_color || null,
           is_large_text: analysisForm.is_large_text,
         }
       );
@@ -417,7 +441,10 @@ function BrandAssets() {
         <div className="dashboard-error brand-message">
           <AlertCircle size={17} />
           {error}
-          <button type="button" onClick={() => setError("")}>
+          <button
+            type="button"
+            onClick={() => setError("")}
+          >
             <X size={16} />
           </button>
         </div>
@@ -427,7 +454,10 @@ function BrandAssets() {
         <div className="brand-success">
           <CheckCircle2 size={17} />
           {success}
-          <button type="button" onClick={() => setSuccess("")}>
+          <button
+            type="button"
+            onClick={() => setSuccess("")}
+          >
             <X size={16} />
           </button>
         </div>
@@ -436,7 +466,9 @@ function BrandAssets() {
       <section className="stats-grid brand-stats">
         <div className="stat-card">
           <div className="stat-top">
-            <div className="stat-icon"><Image size={20} /></div>
+            <div className="stat-icon">
+              <Image size={20} />
+            </div>
           </div>
           <h3>{loading ? "..." : assets.length}</h3>
           <strong>Total assets</strong>
@@ -445,7 +477,9 @@ function BrandAssets() {
 
         <div className="stat-card">
           <div className="stat-top">
-            <div className="stat-icon"><CheckCircle2 size={20} /></div>
+            <div className="stat-icon">
+              <CheckCircle2 size={20} />
+            </div>
           </div>
           <h3>{loading ? "..." : approvedCount}</h3>
           <strong>Approved assets</strong>
@@ -454,7 +488,9 @@ function BrandAssets() {
 
         <div className="stat-card">
           <div className="stat-top">
-            <div className="stat-icon"><Clock3 size={20} /></div>
+            <div className="stat-icon">
+              <Clock3 size={20} />
+            </div>
           </div>
           <h3>{loading ? "..." : pendingCount}</h3>
           <strong>Pending approval</strong>
@@ -487,7 +523,9 @@ function BrandAssets() {
               type="text"
               placeholder="Search assets..."
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) =>
+                setSearch(event.target.value)
+              }
             />
           </div>
 
@@ -509,8 +547,12 @@ function BrandAssets() {
           </div>
         ) : filteredAssets.length === 0 ? (
           <div className="brand-empty">
-            <div className="empty-icon"><FileImage size={26} /></div>
+            <div className="empty-icon">
+              <FileImage size={26} />
+            </div>
+
             <h3>No brand assets found</h3>
+
             <p>
               {search
                 ? "Try another search term."
@@ -531,15 +573,27 @@ function BrandAssets() {
         ) : (
           <div className="brand-assets-grid">
             {filteredAssets.map((asset) => (
-              <article className="brand-asset-card" key={asset.id}>
+              <article
+                className="brand-asset-card"
+                key={asset.id}
+              >
                 <div className="brand-asset-image">
                   {imageUrls[asset.id] ? (
-                    <img src={imageUrls[asset.id]} alt={asset.name} />
+                    <img
+                      src={imageUrls[asset.id]}
+                      alt={asset.name}
+                    />
                   ) : (
-                    <div className="empty-icon"><FileImage size={28} /></div>
+                    <div className="empty-icon">
+                      <FileImage size={28} />
+                    </div>
                   )}
 
-                  <span className={`asset-status ${asset.is_approved ? "approved" : "pending"}`}>
+                  <span
+                    className={`asset-status ${
+                      asset.is_approved ? "approved" : "pending"
+                    }`}
+                  >
                     {asset.is_approved ? (
                       <CheckCircle2 size={13} />
                     ) : (
@@ -551,9 +605,14 @@ function BrandAssets() {
 
                 <div className="brand-asset-info">
                   <div>
-                    <span className="asset-type">{asset.asset_type}</span>
+                    <span className="asset-type">
+                      {asset.asset_type}
+                    </span>
                     <h4>{asset.name}</h4>
-                    <p>{asset.description || "No description provided."}</p>
+                    <p>
+                      {asset.description ||
+                        "No description provided."}
+                    </p>
                   </div>
 
                   <div className="brand-asset-actions">
@@ -592,10 +651,16 @@ function BrandAssets() {
                   {canManage && (
                     <button
                       type="button"
-                      className={`approval-button ${asset.is_approved ? "remove-approval" : ""}`}
+                      className={`approval-button ${
+                        asset.is_approved
+                          ? "remove-approval"
+                          : ""
+                      }`}
                       onClick={() => toggleApproval(asset)}
                     >
-                      {asset.is_approved ? "Remove approval" : "Approve asset"}
+                      {asset.is_approved
+                        ? "Remove approval"
+                        : "Approve asset"}
                     </button>
                   )}
                 </div>
@@ -610,7 +675,11 @@ function BrandAssets() {
           <div className="brand-modal">
             <div className="brand-modal-header">
               <div>
-                <h2>{editingAsset ? "Edit Brand Asset" : "Upload Brand Asset"}</h2>
+                <h2>
+                  {editingAsset
+                    ? "Edit Brand Asset"
+                    : "Upload Brand Asset"}
+                </h2>
                 <p>
                   {editingAsset
                     ? "Update the asset information."
@@ -634,7 +703,10 @@ function BrandAssets() {
                 placeholder="e.g. Company Logo"
                 value={form.name}
                 onChange={(event) =>
-                  setForm({ ...form, name: event.target.value })
+                  setForm({
+                    ...form,
+                    name: event.target.value,
+                  })
                 }
                 required
               />
@@ -643,16 +715,25 @@ function BrandAssets() {
               <select
                 value={form.asset_type}
                 onChange={(event) =>
-                  setForm({ ...form, asset_type: event.target.value })
+                  setForm({
+                    ...form,
+                    asset_type: event.target.value,
+                  })
                 }
                 required
               >
                 <option value="LOGO">Logo</option>
                 <option value="BANNER">Banner</option>
                 <option value="ICON">Icon</option>
-                <option value="PRODUCT_IMAGE">Product Image</option>
-                <option value="SOCIAL_MEDIA">Social Media</option>
-                <option value="ADVERTISEMENT">Advertisement</option>
+                <option value="PRODUCT_IMAGE">
+                  Product Image
+                </option>
+                <option value="SOCIAL_MEDIA">
+                  Social Media
+                </option>
+                <option value="ADVERTISEMENT">
+                  Advertisement
+                </option>
                 <option value="OTHER">Other</option>
               </select>
 
@@ -662,7 +743,10 @@ function BrandAssets() {
                 rows="3"
                 value={form.description}
                 onChange={(event) =>
-                  setForm({ ...form, description: event.target.value })
+                  setForm({
+                    ...form,
+                    description: event.target.value,
+                  })
                 }
               />
 
@@ -674,19 +758,30 @@ function BrandAssets() {
                     className="brand-file-upload"
                     role="button"
                     tabIndex={0}
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() =>
+                      fileInputRef.current?.click()
+                    }
                     onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
+                      if (
+                        event.key === "Enter" ||
+                        event.key === " "
+                      ) {
                         event.preventDefault();
                         fileInputRef.current?.click();
                       }
                     }}
                   >
                     <Upload size={28} />
+
                     <strong>
-                      {selectedFile ? selectedFile.name : "Choose an image"}
+                      {selectedFile
+                        ? selectedFile.name
+                        : "Choose an image"}
                     </strong>
-                    <span>PNG, JPG, JPEG or WEBP · Maximum 10 MB</span>
+
+                    <span>
+                      PNG, JPG, JPEG or WEBP · Maximum 10 MB
+                    </span>
 
                     <button
                       type="button"
@@ -710,13 +805,19 @@ function BrandAssets() {
 
                   {preview && (
                     <div className="brand-upload-preview">
-                      <img src={preview} alt="Selected preview" />
+                      <img
+                        src={preview}
+                        alt="Selected preview"
+                      />
+
                       <span>{selectedFile?.name}</span>
+
                       <button
                         type="button"
                         className="asset-action-button danger"
                         onClick={() => {
                           setSelectedFile(null);
+
                           if (fileInputRef.current) {
                             fileInputRef.current.value = "";
                           }
@@ -749,8 +850,10 @@ function BrandAssets() {
                       <Loader2 className="spin" size={17} />
                       Uploading...
                     </>
+                  ) : editingAsset ? (
+                    "Save changes"
                   ) : (
-                    editingAsset ? "Save changes" : "Upload asset"
+                    "Upload asset"
                   )}
                 </button>
               </div>
@@ -765,7 +868,9 @@ function BrandAssets() {
             <div className="brand-modal-header">
               <div>
                 <h2>{selectedAsset.name}</h2>
-                <p>Brand asset details and accessibility analysis</p>
+                <p>
+                  Brand asset details and accessibility analysis
+                </p>
               </div>
 
               <button
@@ -782,7 +887,10 @@ function BrandAssets() {
 
             <div className="brand-detail-preview">
               {imageUrls[selectedAsset.id] ? (
-                <img src={imageUrls[selectedAsset.id]} alt={selectedAsset.name} />
+                <img
+                  src={imageUrls[selectedAsset.id]}
+                  alt={selectedAsset.name}
+                />
               ) : (
                 <div className="empty-icon">
                   <FileImage size={28} />
@@ -792,35 +900,57 @@ function BrandAssets() {
             </div>
 
             <div className="brand-detail-meta">
-              <span>Type: {selectedAsset.asset_type}</span>
-              <span>Status: {selectedAsset.is_approved ? "Approved" : "Pending"}</span>
+              <span>
+                Type: {selectedAsset.asset_type}
+              </span>
+
+              <span>
+                Status:{" "}
+                {selectedAsset.is_approved
+                  ? "Approved"
+                  : "Pending"}
+              </span>
             </div>
 
             {canManage && selectedAsset.is_approved && (
               <div className="analysis-section">
                 <div className="analysis-heading">
                   <Accessibility size={19} />
+
                   <div>
                     <h3>Accessibility analysis</h3>
-                    <p>Check visual accessibility and brand consistency</p>
+                    <p>
+                      Check visual accessibility and brand consistency
+                    </p>
                   </div>
                 </div>
 
                 <label>Approved brand colors</label>
+
                 <input
                   value={analysisForm.approved_colors}
                   onChange={(event) =>
-                    setAnalysisForm({ ...analysisForm, approved_colors: event.target.value })
+                    setAnalysisForm({
+                      ...analysisForm,
+                      approved_colors: event.target.value,
+                    })
                   }
                   placeholder="#000000,#FFFFFF"
                 />
-                <small>Enter hex colors separated by commas.</small>
+
+                <small>
+                  Enter hex colors separated by commas.
+                </small>
 
                 <label>Alternative text</label>
+
                 <input
                   value={analysisForm.alt_text}
                   onChange={(event) =>
-                    setAnalysisForm({ ...analysisForm, alt_text: event.target.value })
+                    setAnalysisForm({
+                      ...analysisForm,
+                      alt_text: event.target.value,
+                    })
                   }
                   placeholder="Describe the image..."
                 />
@@ -828,20 +958,28 @@ function BrandAssets() {
                 <div className="analysis-color-grid">
                   <div>
                     <label>Foreground color</label>
+
                     <input
                       value={analysisForm.foreground_color}
                       onChange={(event) =>
-                        setAnalysisForm({ ...analysisForm, foreground_color: event.target.value })
+                        setAnalysisForm({
+                          ...analysisForm,
+                          foreground_color: event.target.value,
+                        })
                       }
                     />
                   </div>
 
                   <div>
                     <label>Background color</label>
+
                     <input
                       value={analysisForm.background_color}
                       onChange={(event) =>
-                        setAnalysisForm({ ...analysisForm, background_color: event.target.value })
+                        setAnalysisForm({
+                          ...analysisForm,
+                          background_color: event.target.value,
+                        })
                       }
                     />
                   </div>
@@ -852,9 +990,13 @@ function BrandAssets() {
                     type="checkbox"
                     checked={analysisForm.is_large_text}
                     onChange={(event) =>
-                      setAnalysisForm({ ...analysisForm, is_large_text: event.target.checked })
+                      setAnalysisForm({
+                        ...analysisForm,
+                        is_large_text: event.target.checked,
+                      })
                     }
                   />
+
                   Text is large (18pt or 14pt bold)
                 </label>
 
@@ -869,24 +1011,44 @@ function BrandAssets() {
                   ) : (
                     <ScanText size={17} />
                   )}
-                  {analyzing ? "Analyzing..." : "Run image analysis"}
+
+                  {analyzing
+                    ? "Analyzing..."
+                    : "Run image analysis"}
                 </button>
 
                 {analysis && (
                   <div className="analysis-results">
-                    <h3><CheckCircle2 size={18} /> Analysis results</h3>
+                    <h3>
+                      <CheckCircle2 size={18} />
+                      Analysis results
+                    </h3>
 
                     {[
                       ["OCR Results", analysis.ocr, ScanText],
                       ["Brand Palette", analysis.palette, Palette],
-                      ["Alt Text", analysis.alt_text, Accessibility],
-                      ["Contrast", analysis.contrast, ShieldCheck],
+                      [
+                        "Alt Text",
+                        analysis.alt_text,
+                        Accessibility,
+                      ],
+                      [
+                        "Contrast",
+                        analysis.contrast,
+                        ShieldCheck,
+                      ],
                     ].map(([title, value, Icon]) => (
-                      <div className="analysis-result-card" key={title}>
+                      <div
+                        className="analysis-result-card"
+                        key={title}
+                      >
                         <Icon size={18} />
+
                         <div>
                           <strong>{title}</strong>
-                          <pre>{JSON.stringify(value, null, 2)}</pre>
+                          <pre>
+                            {JSON.stringify(value, null, 2)}
+                          </pre>
                         </div>
                       </div>
                     ))}

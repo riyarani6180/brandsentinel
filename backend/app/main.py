@@ -14,6 +14,7 @@ from app.api.review_findings import router as review_findings_router
 from app.api.review_comments import router as review_comments_router
 from app.api.user_management import router as user_management_router
 from app.api.audit_logs import router as audit_logs_router
+from app.api.compliance import router as compliance_router
 from app.api.brand_assets import router as brand_assets_router
 from app.api.document_upload import router as document_upload_router
 
@@ -36,11 +37,13 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "https://brandsentinel-teal.vercel.app",
-        "https://brandsentinel-fgqfolntl-riyarani6180.vercel.app",
-    ],
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://brandsentinel-teal.vercel.app",
+    "https://brandsentinel-fgqfolntl-riyarani6180.vercel.app",
+    "https://brandsentinel-c34akzov0-riyarani6180.vercel.app",
+],
+
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -58,6 +61,7 @@ app.include_router(review_findings_router)
 app.include_router(review_comments_router)
 app.include_router(user_management_router)
 app.include_router(audit_logs_router)
+app.include_router(compliance_router)
 app.include_router(brand_assets_router)
 app.include_router(document_upload_router)
 
