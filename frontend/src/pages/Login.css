@@ -34,3 +34,130 @@
   .mobile-login-logo { display: flex; align-items: center; gap: 10px; color: #315de7; font: 800 19px 'Plus Jakarta Sans', sans-serif; margin-bottom: 55px; }
   .login-form h2 { font-size: 24px; }
 }
+
+/* Attractive compact role selection */
+
+.role-selection {
+  max-width: 430px;
+}
+
+.role-selection h2 {
+  font-size: 30px;
+  margin-bottom: 8px;
+}
+
+.role-selection .form-description {
+  margin-bottom: 30px;
+}
+
+.role-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.role-card {
+  width: 100%;
+  min-height: 105px;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 1px solid #e4e9f4;
+  border-radius: 17px;
+  background: white;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.25s ease;
+  box-shadow: 0 6px 20px rgba(30, 50, 90, 0.06);
+}
+
+.role-card strong {
+  flex: 1;
+  color: #17233c;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.role-icon {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  background: linear-gradient(135deg, #315de7, #7595ff);
+  color: white;
+}
+
+.customer-role .role-icon {
+  background: linear-gradient(135deg, #8055d9, #b28aff);
+}
+
+.role-arrow {
+  color: #8793a9;
+  transition: transform 0.25s ease;
+}
+
+.admin-role:hover {
+  border-color: #315de7;
+  background: #f5f8ff;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 26px rgba(49, 93, 231, 0.13);
+}
+
+.customer-role:hover {
+  border-color: #9569e8;
+  background: #faf7ff;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 26px rgba(128, 85, 217, 0.13);
+}
+
+.role-card:hover .role-arrow {
+  transform: translateX(5px);
+}
+
+.role-card:focus-visible {
+  outline: 3px solid #315de7;
+  outline-offset: 4px;
+}
+
+.back-role-button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 25px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #52627e;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.back-role-button:hover {
+  color: #315de7;
+}
+
+.role-hint {
+  margin-top: 13px;
+  color: #8490a5;
+  font-size: 11px;
+  text-align: center;
+}
+
+@media(max-width: 750px) {
+  .role-selection h2 {
+    font-size: 25px;
+  }
+
+  .role-card {
+    min-height: 92px;
+    padding: 15px;
+  }
+
+  .role-icon {
+    width: 54px;
+    height: 54px;
+  }
+}
