@@ -14,6 +14,7 @@ from app.api.review_findings import router as review_findings_router
 from app.api.review_comments import router as review_comments_router
 from app.api.user_management import router as user_management_router
 from app.api.audit_logs import router as audit_logs_router
+from app.api.compliance import router as compliance_router
 from app.api.brand_assets import router as brand_assets_router
 from app.api.document_upload import router as document_upload_router
 
@@ -58,6 +59,7 @@ app.include_router(review_findings_router)
 app.include_router(review_comments_router)
 app.include_router(user_management_router)
 app.include_router(audit_logs_router)
+app.include_router(compliance_router)
 app.include_router(brand_assets_router)
 app.include_router(document_upload_router)
 

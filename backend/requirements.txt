@@ -23,3 +23,5 @@ psycopg[binary]
 pwdlib[argon2]
 PyJWT
 pytesseract
+
+sentence-transformers

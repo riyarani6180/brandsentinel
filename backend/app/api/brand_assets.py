@@ -30,6 +30,8 @@ from app.security.dependencies import get_current_user
 from app.security.permissions import require_user_permission
 
 from app.services.image_review_service import analyze_brand_image
+from app.services.creative_review_service import review_marketing_creative
+from app.accessibility.logo_similarity_checker import verify_logo_identity
 
 
 router = APIRouter(
@@ -219,6 +221,8 @@ async def upload_brand_asset(
 
     content = await file.read(MAX_FILE_SIZE + 1)
 
+    saved_path = None
+
     try:
 
         if len(content) > MAX_FILE_SIZE:
@@ -264,7 +268,7 @@ async def upload_brand_asset(
     except HTTPException:
         db.rollback()
 
-        if "saved_path" in locals() and saved_path.exists():
+        if saved_path and saved_path.exists():
             saved_path.unlink()
 
         raise
@@ -272,7 +276,7 @@ async def upload_brand_asset(
     except Exception:
         db.rollback()
 
-        if "saved_path" in locals() and saved_path.exists():
+        if saved_path and saved_path.exists():
             saved_path.unlink()
 
         raise HTTPException(
@@ -501,17 +505,11 @@ def analyze_image_endpoint(
 
     try:
 
-        image_path = resolve_asset_image_path(
-            asset.file_path
-        )
-
-        if not image_path.exists():
-            raise FileNotFoundError(
-                "Brand asset image does not exist."
-            )
+        resolve_asset_image_path(asset.file_path)
 
         return analyze_brand_image(
             asset=asset,
+            db=db,
             approved_colors=request.approved_colors,
             alt_text=request.alt_text,
             foreground_color=request.foreground_color,
@@ -539,3 +537,228 @@ def analyze_image_endpoint(
             status_code=500,
             detail="Image analysis failed."
         )
+
+
+# ==========================================
+# REVIEW MARKETING CREATIVE
+# ==========================================
+
+@router.post("/creative-review")
+async def creative_review_endpoint(
+    file: UploadFile = File(...),
+    alt_text: str | None = Form(None),
+    foreground_color: str | None = Form(None),
+    background_color: str | None = Form(None),
+    is_large_text: bool = Form(False),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_user_permission("MANAGE_BRAND_ASSETS")
+    )
+):
+
+    extension = Path(file.filename or "").suffix.lower()
+
+    if extension not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail="Only PNG, JPG, JPEG and WEBP images are supported."
+        )
+
+    if bool(foreground_color) != bool(background_color):
+        raise HTTPException(
+            status_code=400,
+            detail="Provide both foreground and background colours for contrast checking."
+        )
+
+    content = await file.read(MAX_FILE_SIZE + 1)
+
+    temporary_path = None
+
+    try:
+
+        if len(content) > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail="Image size must not exceed 10 MB."
+            )
+
+        validate_image(content, extension)
+
+        UPLOAD_DIR.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        temporary_path = (
+            UPLOAD_DIR / f"creative_{uuid4().hex}{extension}"
+        ).resolve()
+
+        if not temporary_path.is_relative_to(UPLOAD_ROOT):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid upload location."
+            )
+
+        temporary_path.write_bytes(content)
+
+        return review_marketing_creative(
+            image_path=str(temporary_path),
+            db=db,
+            alt_text=alt_text,
+            foreground_color=foreground_color,
+            background_color=background_color,
+            is_large_text=is_large_text
+        )
+
+    except HTTPException:
+        raise
+
+    except (FileNotFoundError, ValueError) as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error)
+        )
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="Marketing creative review failed."
+        )
+
+    finally:
+        if temporary_path and temporary_path.exists():
+            temporary_path.unlink()
+
+        await file.close()
+
+# ==========================================
+# LOGO IDENTITY VERIFICATION
+# ==========================================
+
+@router.post("/verify-logo")
+async def verify_logo_endpoint(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_user_permission("MANAGE_BRAND_ASSETS")
+    )
+):
+
+    extension = Path(file.filename or "").suffix.lower()
+
+    if extension not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail="Only PNG, JPG, JPEG and WEBP images are supported."
+        )
+
+    content = await file.read(MAX_FILE_SIZE + 1)
+
+    temporary_path = None
+
+    try:
+
+        if len(content) > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail="Image size must not exceed 10 MB."
+            )
+
+        validate_image(content, extension)
+
+        # Retrieve active and approved logo references.
+        approved_assets = (
+            db.query(BrandAsset)
+            .filter(
+                BrandAsset.is_active.is_(True),
+                BrandAsset.is_approved.is_(True)
+            )
+            .all()
+        )
+
+        logo_references = []
+        skipped_reference_ids = []
+
+        for asset in approved_assets:
+
+            asset_type = (
+                asset.asset_type.strip().upper()
+                if asset.asset_type
+                else ""
+            )
+
+            if asset_type not in {
+                "LOGO",
+                "PRIMARY_LOGO",
+                "SECONDARY_LOGO"
+            }:
+                continue
+
+            try:
+                reference_path = resolve_asset_image_path(
+                    asset.file_path
+                )
+
+                logo_references.append({
+                    "asset_id": asset.id,
+                    "asset_name": asset.name,
+                    "file_path": str(reference_path)
+                })
+
+            except HTTPException:
+                skipped_reference_ids.append(asset.id)
+
+        # Store submitted logo temporarily.
+        UPLOAD_DIR.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        temporary_path = (
+            UPLOAD_DIR / f"logo_review_{uuid4().hex}{extension}"
+        ).resolve()
+
+        if not temporary_path.is_relative_to(UPLOAD_ROOT):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid upload location."
+            )
+
+        temporary_path.write_bytes(content)
+
+        # Perform deterministic logo comparison.
+        result = verify_logo_identity(
+            str(temporary_path),
+            logo_references
+        )
+
+        result["skipped_reference_asset_ids"] = (
+            skipped_reference_ids
+        )
+
+        result["total_approved_logo_references"] = (
+            len(logo_references)
+        )
+
+        return result
+
+    except HTTPException:
+        raise
+
+    except (FileNotFoundError, ValueError) as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error)
+        )
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="Logo identity verification failed."
+        )
+
+    finally:
+        if temporary_path and temporary_path.exists():
+            temporary_path.unlink()
+
+        await file.close()
