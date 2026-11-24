@@ -43,6 +43,7 @@ allow_origins=[
     "https://brandsentinel-fgqfolntl-riyarani6180.vercel.app",
     "https://brandsentinel-c34akzov0-riyarani6180.vercel.app",
     "https://brandsentinel-xu17-4xu0s4pmg-riyarani6180.vercel.app",
+    "https://brandsentinel-21lm-git-round-3-submission-riyarani6180.vercel.app",
 ],
 
     allow_credentials=True,
